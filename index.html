@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b1024">
+<meta name="description" content="Noor Al-Islam: Quran reading, dhikr, prayer reminders, daily Islamic quiz and a study assistant.">
+<title>Noor Al-Islam | Islamic Super App</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Amiri:wght@400;700&display=swap');
+
+:root{
+  --bg:#111a35;
+  --bg2:#1a2445;
+  --panel:rgba(35,39,78,.55);
+  --panel2:#23274e;
+  --gold:#e7c879;
+  --gold2:#f6e6ae;
+  --mint:#c7c9ff;
+  --white:#f5f8f3;
+  --muted:#c2c6df;
+  --line:rgba(231,200,121,.17);
+  --danger:#ef9696;
+  --shadow:0 20px 70px rgba(0,0,0,.24);
+  --radius:22px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(ellipse at 15% 0%,rgba(85,82,184,.23),transparent 36%),
+    radial-gradient(ellipse at 100% 20%,rgba(195,155,73,.10),transparent 32%),
+    linear-gradient(145deg,#0b1024,#111a35 48%,#0b1024);
+  color:var(--white);
+  font-family:'DM Sans',sans-serif;
+  overflow-x:hidden;
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{
+  outline:2px solid var(--gold);outline-offset:3px
+}
+button:disabled{opacity:.5;cursor:not-allowed}
+a{color:inherit;text-decoration:none}
+::selection{background:var(--gold);color:#0d1530}
+
+.ambient{
+  position:fixed;inset:0;pointer-events:none;z-index:-1;overflow:hidden
+}
+.ambient:before,.ambient:after{
+  content:"";position:absolute;border-radius:50%;filter:blur(70px);opacity:.16
+}
+.ambient:before{width:350px;height:350px;background:#5552b8;top:20%;left:-180px;opacity:.24}
+.ambient:after{width:300px;height:300px;background:#d6ad54;right:-150px;bottom:5%;opacity:.22}
+
+
+/* Living night-sky background: slow stars, moonlit haze and Islamic geometry */
+#starCanvas{
+  position:fixed;inset:0;width:100%;height:100%;pointer-events:none;
+  z-index:0;opacity:1
+}
+.ambient{z-index:0}
+.ambient:before,.ambient:after{animation:ambientDrift 22s ease-in-out infinite alternate}
+.ambient:after{animation-delay:-11s}
+.ambient-geometry{
+  position:fixed;inset:-15%;z-index:0;pointer-events:none;overflow:hidden;
+  opacity:.22;transform:rotate(-8deg);
+  background-image:
+    repeating-linear-gradient(45deg,transparent 0 48px,rgba(231,200,121,.17) 49px 50px,transparent 51px 98px),
+    repeating-linear-gradient(-45deg,transparent 0 48px,rgba(155,165,255,.12) 49px 50px,transparent 51px 98px);
+  mask-image:radial-gradient(ellipse at center,#000 0%,transparent 75%);
+  animation:geometryFloat 70s linear infinite
+}
+.moon-glow{
+  position:fixed;right:7%;top:11%;width:170px;height:170px;border-radius:50%;
+  z-index:0;pointer-events:none;opacity:.22;
+  background:radial-gradient(circle at 35% 30%,#fff4c6 0 18%,#e7c879 42%,transparent 72%);
+  filter:blur(2px);animation:moonPulse 8s ease-in-out infinite
+}
+.app{position:relative;z-index:1;max-width:1500px;margin:auto;min-height:100vh}
+@keyframes ambientDrift{from{transform:translate3d(-12px,-8px,0) scale(.94)}to{transform:translate3d(35px,22px,0) scale(1.08)}}
+@keyframes geometryFloat{from{background-position:0 0,0 0}to{background-position:180px 130px,-130px 180px}}
+@keyframes moonPulse{0%,100%{transform:scale(.92);opacity:.08}50%{transform:scale(1.08);opacity:.18}}
+@media(prefers-reduced-motion:reduce){
+  .ambient:before,.ambient:after,.ambient-geometry,.moon-glow{animation:none!important}
+  #starCanvas{opacity:.35}
+}
+
+
+/* Header */
+.topbar{
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  padding:17px 4%;
+  background:rgba(11,16,36,.92);
+  backdrop-filter:blur(22px);
+  border-bottom:1px solid var(--line)
+}
+.brand{display:flex;align-items:center;gap:12px;min-width:220px}
+.brand-mark{
+  width:44px;height:44px;border-radius:15px;
+  display:grid;place-items:center;
+  color:#13251a;background:linear-gradient(145deg,#f4dfa0,#bd9650);
+  font-size:25px;box-shadow:0 5px 25px rgba(231,200,121,.15)
+}
+.brand-name{font-family:'Playfair Display',serif;font-size:19px;letter-spacing:.2px}
+.brand-sub{font-size:10px;color:var(--muted);letter-spacing:2px;margin-top:3px}
+.top-actions{display:flex;align-items:center;gap:12px}
+.clock-pill,.icon-button{
+  border:1px solid var(--line);background:rgba(255,255,255,.035);
+  color:var(--white);border-radius:14px
+}
+.clock-pill{padding:10px 13px;font-size:12px;color:var(--gold2)}
+.icon-button{width:42px;height:42px;font-size:17px}
+.icon-button:hover{background:rgba(231,200,121,.1)}
+.profile{
+  width:40px;height:40px;border-radius:50%;display:grid;place-items:center;
+  background:linear-gradient(135deg,#c3a15a,#f2e2a8);color:#1b2b1c;font-weight:700
+}
+
+/* Layout */
+.layout{display:grid;grid-template-columns:238px minmax(0,1fr);gap:25px;padding:25px 3%}
+.sidebar{position:sticky;top:100px;height:max-content}
+.side-label{font-size:10px;color:#9ba7d8;letter-spacing:2px;margin:17px 13px 10px}
+.nav-item{
+  width:100%;display:flex;align-items:center;gap:12px;text-align:left;
+  border:1px solid transparent;background:transparent;color:var(--muted);
+  padding:13px 14px;border-radius:14px;margin-bottom:5px;transition:.22s
+}
+.nav-item .nav-icon{width:23px;text-align:center;font-size:17px}
+.nav-item:hover{background:rgba(255,255,255,.035);color:var(--white)}
+.nav-item.active{
+  color:var(--gold2);background:linear-gradient(100deg,rgba(231,200,121,.15),rgba(231,200,121,.035));
+  border-color:rgba(231,200,121,.2)
+}
+.sidebar-card{
+  margin-top:24px;padding:18px;border:1px solid var(--line);
+  border-radius:18px;background:linear-gradient(145deg,rgba(231,200,121,.09),rgba(255,255,255,.02))
+}
+.sidebar-card p{font-size:12px;color:var(--muted);line-height:1.7;margin:9px 0 13px}
+.main{min-width:0}
+.view{display:none;animation:appear .35s ease}
+.view.active{display:block}
+@keyframes appear{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Shared */
+.eyebrow{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:var(--mint);margin-bottom:10px}
+h1,h2,h3{font-family:'Playfair Display',serif;font-weight:600}
+h1{font-size:clamp(30px,4vw,48px);line-height:1.15}
+h2{font-size:27px}
+h3{font-size:19px}
+p{line-height:1.7}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.gold{color:var(--gold)}
+.arabic{font-family:'Amiri',serif;direction:rtl;line-height:1.9}
+.panel{
+  border:1px solid var(--line);border-radius:var(--radius);
+  background:linear-gradient(145deg,rgba(35,39,78,.82),rgba(17,26,53,.92));
+  box-shadow:var(--shadow);min-width:0
+}
+.panel-pad{padding:24px}
+.section-head{display:flex;justify-content:space-between;align-items:center;gap:15px;margin:30px 0 16px}
+.section-head:first-child{margin-top:0}
+.section-head p{font-size:12px;color:var(--muted);margin-top:5px}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border-radius:12px;border:1px solid var(--line);padding:11px 15px;
+  color:var(--white);background:rgba(255,255,255,.04);transition:.2s
+}
+.btn:hover{transform:translateY(-1px);border-color:rgba(231,200,121,.45)}
+.btn-gold{background:linear-gradient(135deg,#f0d99c,#c9a55c);color:#1a291c;border:0;font-weight:700}
+.btn-green{background:rgba(85,82,184,.18);border-color:rgba(155,165,255,.25);color:#d4d3ff}
+.btn-danger{color:#ffc3c3;border-color:rgba(239,150,150,.25)}
+.input,.select,.textarea{
+  width:100%;padding:12px 14px;border:1px solid var(--line);
+  border-radius:12px;background:#111a35;color:var(--white);outline:none
+}
+.input::placeholder,.textarea::placeholder{color:#789589}
+.textarea{min-height:95px;resize:vertical}
+.select option{background:#111a35}
+.grid{display:grid;gap:17px}
+.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.row{display:flex;align-items:center;gap:12px}
+.between{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.badge{
+  display:inline-flex;align-items:center;gap:5px;padding:6px 9px;
+  font-size:10px;letter-spacing:.4px;border-radius:8px;
+  color:var(--mint);background:rgba(85,82,184,.18)
+}
+.divider{height:1px;background:var(--line);margin:18px 0}
+.progress{height:7px;background:rgba(255,255,255,.07);border-radius:20px;overflow:hidden}
+.progress-fill{height:100%;width:0;background:linear-gradient(90deg,#aaa5ff,#e7c879);border-radius:20px;transition:width .35s}
+.stat-card{padding:20px;border:1px solid var(--line);border-radius:19px;background:rgba(255,255,255,.025)}
+.stat-top{display:flex;align-items:center;justify-content:space-between}
+.stat-icon{width:39px;height:39px;display:grid;place-items:center;border-radius:13px;background:rgba(231,200,121,.1);font-size:18px}
+.stat-number{font-size:29px;font-weight:700;margin:15px 0 4px;letter-spacing:-1px}
+.stat-caption{font-size:11px;color:var(--muted)}
+.stat-foot{font-size:10px;color:var(--mint);margin-top:12px}
+.empty-note{padding:25px;text-align:center;color:var(--muted);font-size:13px}
+
+/* Hero */
+.hero{
+  position:relative;overflow:hidden;padding:34px;border-radius:27px;
+  border:1px solid rgba(231,200,121,.22);
+  background:
+    radial-gradient(ellipse at 90% 10%,rgba(231,200,121,.14),transparent 37%),
+    radial-gradient(ellipse at 10% 100%,rgba(85,82,184,.20),transparent 45%),
+    linear-gradient(125deg,#23274e,#111a35 70%);
+  min-height:275px;display:flex;align-items:center
+}
+.hero-content{position:relative;z-index:2;max-width:650px}
+.hero p{color:#d6d9f2;margin-top:15px;max-width:580px;font-size:14px}
+.hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:23px}
+.hero-moon{
+  position:absolute;right:8%;top:50%;transform:translateY(-50%);
+  width:190px;height:190px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#fff1b8,#d6b35f 52%,#97703a);
+  box-shadow:0 0 90px rgba(231,200,121,.13),inset -18px -16px 35px rgba(50,40,16,.22)
+}
+.hero-moon:after{
+  content:"";position:absolute;width:170px;height:170px;border-radius:50%;
+  background:#103126;top:-14px;left:46px
+}
+.hero-star{position:absolute;color:var(--gold2);font-size:19px}
+.hero-star.one{right:7%;top:15%}
+.hero-star.two{right:35%;top:20%;font-size:12px}
+.hero-star.three{right:4%;bottom:20%;font-size:12px}
+.bismillah{font-size:23px;color:var(--gold2);margin-bottom:14px}
+.date-line{display:flex;flex-wrap:wrap;gap:12px;margin-top:17px;font-size:11px;color:var(--muted)}
+
+/* Prayer */
+.prayer-list{display:grid;gap:10px}
+.prayer-row{
+  display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:16px;
+  padding:15px;border-radius:14px;background:rgba(255,255,255,.025);border:1px solid transparent
+}
+.prayer-row.next{border-color:rgba(231,200,121,.35);background:rgba(231,200,121,.055)}
+.prayer-symbol{width:39px;height:39px;display:grid;place-items:center;background:rgba(231,200,121,.09);border-radius:12px}
+.prayer-name{font-weight:600;font-size:13px}
+.prayer-ar{font-size:17px;color:var(--gold);font-family:'Amiri',serif}
+.prayer-time{font-weight:600;font-size:13px;white-space:nowrap}
+.switch{width:42px;height:24px;position:relative;display:inline-block;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;border-radius:20px;background:#30473d;transition:.2s}
+.slider:before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;border-radius:50%;background:#d6d9f2;transition:.2s}
+.switch input:checked+.slider{background:#a58b4d}
+.switch input:checked+.slider:before{transform:translateX(18px);background:#fff0c4}
+.alarm-controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:15px}
+.alarm-box{padding:15px;border-radius:14px;background:rgba(255,255,255,.025)}
+.alarm-box label{display:block;font-size:11px;color:var(--muted);margin-bottom:8px}
+.alarm-box input{width:100%;color-scheme:dark}
+
+/* Quran */
+.quran-verse{padding:24px 0;border-bottom:1px solid var(--line)}
+.quran-verse:last-child{border-bottom:0}
+.verse-number{font-size:10px;color:var(--gold);letter-spacing:1px}
+.verse-ar{font-family:'Amiri',serif;direction:rtl;text-align:right;font-size:29px;line-height:2.1;margin:10px 0;color:#f4e5b8}
+.verse-en{font-size:13px;line-height:1.8;color:#d6d9f2}
+.verse-ur{font-size:15px;direction:rtl;text-align:right;line-height:2;color:#c2c6df;margin-top:7px}
+
+/* Tasbeeh */
+.tasbeeh-card{text-align:center;padding:27px}
+.tasbeeh-ar{font-family:'Amiri',serif;font-size:31px;color:var(--gold2);margin:20px 0 3px}
+.counter-number{font-size:76px;line-height:1.15;font-weight:700;letter-spacing:-4px;margin:15px 0}
+.counter-ring{
+  width:180px;height:180px;margin:20px auto;display:grid;place-items:center;
+  border-radius:50%;position:relative;
+  background:conic-gradient(var(--gold) var(--ring,0%),rgba(255,255,255,.07) 0);
+  box-shadow:0 0 35px rgba(231,200,121,.06)
+}
+.counter-ring:before{content:"";position:absolute;inset:9px;background:#0d2a20;border-radius:50%}
+.counter-inner{position:relative;z-index:1}
+.counter-button{
+  width:100%;max-width:250px;height:64px;border:1px solid rgba(231,200,121,.5);
+  border-radius:17px;color:#14261a;background:linear-gradient(135deg,#f2d99a,#c49a4e);
+  font-size:25px;font-weight:700;box-shadow:0 9px 28px rgba(231,200,121,.13);
+  transition:.15s
+}
+.counter-button:active{transform:scale(.97)}
+.quick-zikr{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.quick-zikr button{font-size:11px}
+
+/* Compass */
+.compass-shell{
+  width:min(290px,78vw);aspect-ratio:1;margin:20px auto;
+  border-radius:50%;padding:12px;
+  background:radial-gradient(circle,#183c2c,#091b14 70%);
+  border:1px solid rgba(231,200,121,.35);
+  box-shadow:0 0 50px rgba(0,0,0,.25),inset 0 0 25px rgba(231,200,121,.04)
+}
+.compass-face{
+  width:100%;height:100%;position:relative;border-radius:50%;
+  border:1px solid rgba(231,200,121,.3);
+  background:repeating-conic-gradient(from 0deg,rgba(231,200,121,.4) 0deg 1deg,transparent 1deg 15deg)
+}
+.compass-face:before{content:"";position:absolute;inset:10%;border:1px solid rgba(231,200,121,.18);border-radius:50%}
+.compass-label{position:absolute;font-size:11px;color:var(--gold2);font-weight:700}
+.compass-label.n{top:7%;left:50%;transform:translateX(-50%)}
+.compass-label.s{bottom:7%;left:50%;transform:translateX(-50%)}
+.compass-label.e{right:7%;top:50%;transform:translateY(-50%)}
+.compass-label.w{left:7%;top:50%;transform:translateY(-50%)}
+.compass-needle{
+  position:absolute;left:50%;top:50%;width:4px;height:63%;
+  transform:translate(-50%,-50%) rotate(0deg);transform-origin:center;
+  transition:transform .2s ease
+}
+.compass-needle:before{
+  content:"";position:absolute;left:-7px;top:0;width:0;height:0;
+  border-left:9px solid transparent;border-right:9px solid transparent;
+  border-bottom:72px solid #e7c879
+}
+.compass-needle:after{
+  content:"";position:absolute;left:-7px;bottom:0;width:0;height:0;
+  border-left:9px solid transparent;border-right:9px solid transparent;
+  border-top:72px solid #7abca0
+}
+.compass-center{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:24px;height:24px;border-radius:50%;background:#f3e2a5;border:4px solid #173b2b
+}
+.compass-caption{text-align:center;color:var(--muted);font-size:12px}
+
+/* AI */
+.chat-window{
+  min-height:280px;max-height:430px;overflow:auto;padding:18px;
+  display:flex;flex-direction:column;gap:13px
+}
+.chat-message{max-width:90%;padding:13px 15px;border-radius:15px;font-size:13px;line-height:1.7;white-space:pre-wrap}
+.chat-message.bot{align-self:flex-start;background:rgba(255,255,255,.055);border:1px solid var(--line);color:#f0efff}
+.chat-message.user{align-self:flex-end;background:rgba(231,200,121,.14);border:1px solid rgba(231,200,121,.2)}
+.chat-form{display:flex;gap:10px;padding:15px;border-top:1px solid var(--line)}
+.chat-form .input{flex:1;min-width:0}
+.chat-form{align-items:center}
+#voiceBtn{flex:0 0 auto;min-width:44px}
+#voiceStatus{font-size:10px}
+
+.suggestion{font-size:11px;padding:8px 10px}
+
+/* Ranking */
+.rank-row{display:grid;grid-template-columns:35px 1fr auto;gap:12px;align-items:center;padding:15px 0;border-bottom:1px solid var(--line)}
+.rank-row:last-child{border-bottom:0}
+.rank-number{font-size:14px;color:var(--gold);font-weight:700}
+.avatar{width:37px;height:37px;border-radius:50%;display:grid;place-items:center;background:rgba(155,216,181,.13);color:var(--mint);font-weight:700}
+.rank-name{font-size:12px;font-weight:600}
+.rank-points{font-size:12px;color:var(--gold2)}
+.goal-row{margin:18px 0}
+.goal-row .between{font-size:12px;margin-bottom:9px}
+
+/* Settings */
+.setting-row{padding:17px 0;border-bottom:1px solid var(--line)}
+.setting-row:last-child{border-bottom:0}
+.toast{
+  position:fixed;bottom:22px;left:50%;transform:translate(-50%,20px);
+  z-index:1000;background:#f0d99c;color:#17271b;border-radius:13px;
+  padding:12px 18px;font-size:12px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;
+  box-shadow:var(--shadow);max-width:90vw;text-align:center
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.bottom-nav{display:none}
+footer{text-align:center;padding:25px;color:#779589;font-size:10px;letter-spacing:.5px}
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+@media(max-width:1050px){
+  .layout{grid-template-columns:200px minmax(0,1fr);gap:16px}
+  .grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hero-moon{right:4%;width:140px;height:140px}
+  .hero-moon:after{width:130px;height:130px;left:35px;top:-10px}
+}
+@media(max-width:760px){
+  .topbar{padding:12px 16px}
+  .brand{min-width:0}
+  .brand-name{font-size:16px}
+  .brand-sub{font-size:8px}
+  .clock-pill{display:none}
+  .layout{display:block;padding:18px 14px 85px}
+  .sidebar{display:none}
+  .hero{padding:27px 23px;min-height:300px}
+  .hero-moon{opacity:.22;right:-40px;top:55%}
+  .hero-content{max-width:100%}
+  .hero h1{font-size:34px}
+  .grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid-2{grid-template-columns:1fr}
+  .section-head{margin-top:24px}
+  .panel-pad{padding:19px}
+  .bottom-nav{
+    position:fixed;bottom:0;left:0;right:0;z-index:200;
+    display:flex;justify-content:space-around;gap:3px;
+    padding:8px 5px calc(8px + env(safe-area-inset-bottom));
+    background:rgba(11,16,36,.96);backdrop-filter:blur(20px);
+    border-top:1px solid var(--line)
+  }
+  .bottom-nav button{
+    flex:1;min-width:0;padding:8px 2px;border:0;border-radius:10px;
+    background:transparent;color:var(--muted);font-size:10px
+  }
+  .bottom-nav button span{display:block;font-size:18px;margin-bottom:4px}
+  .bottom-nav button.active{color:var(--gold2);background:rgba(231,200,121,.09)}
+  footer{padding-bottom:95px}
+}
+@media(max-width:390px){
+  .grid-3,.grid-4{grid-template-columns:1fr 1fr;gap:9px}
+  .stat-card{padding:14px}
+  .stat-number{font-size:24px}
+  .hero h1{font-size:29px}
+  .prayer-row{gap:9px;padding:12px}
+  .prayer-time{font-size:11px}
+}
+
+
+/* Authentication gate */
+#authGate{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:22px;overflow:auto;background:rgba(6,10,25,.92);backdrop-filter:blur(18px)}
+#authGate[hidden]{display:none!important}
+.auth-card{width:min(100%,440px);padding:30px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(145deg,rgba(17,26,53,.98),rgba(11,16,36,.98));box-shadow:0 25px 90px #0008;text-align:center}
+.auth-logo{width:66px;height:66px;border-radius:22px;display:grid;place-items:center;margin:0 auto 16px;background:linear-gradient(145deg,var(--gold2),var(--gold));color:#0d1530;font-size:35px;box-shadow:0 0 35px #e7c87922}
+.auth-card h1{font-size:28px;margin-bottom:8px}.auth-card>p{color:var(--muted);line-height:1.65;margin-bottom:20px;font-size:14px}
+.auth-provider{width:100%;display:flex;align-items:center;justify-content:center;gap:11px;padding:12px 15px;margin:9px 0;border:1px solid var(--line);border-radius:12px;background:#ffffff08;color:var(--white);font-weight:600;transition:.2s}
+.auth-provider:hover{transform:translateY(-2px);border-color:var(--gold);background:#ffffff12}
+.auth-provider.google{background:#fff;color:#222;border-color:#ddd}.auth-provider.facebook{background:#1877f2;color:white;border-color:#1877f2}
+.auth-provider .provider-icon{font-size:19px;min-width:22px}
+.auth-divider{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:12px;margin:17px 0}.auth-divider:before,.auth-divider:after{content:"";height:1px;flex:1;background:var(--line)}
+.auth-fields{text-align:left}.auth-fields label{font-size:12px;color:var(--muted)}.auth-fields input{width:100%;margin:6px 0 12px;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:#061a13;color:var(--white)}
+.auth-message{min-height:20px;font-size:12px;line-height:1.5;color:var(--gold);margin-top:12px;overflow-wrap:anywhere}.auth-note{font-size:11px!important;margin:17px 0 0!important}
+.auth-signout{border:1px solid var(--line);border-radius:10px;background:#ffffff08;color:var(--white);padding:8px 11px;font-size:12px}
+.app.auth-locked{filter:blur(5px);pointer-events:none;user-select:none}
+@media(max-width:480px){.auth-card{padding:23px 18px}.auth-card h1{font-size:25px}}
+
+
+/* Updated palette: midnight navy + soft violet + champagne gold */
+:root{
+  --bg:#0b1024; --bg2:#111a35; --panel:rgba(28,37,70,.82); --panel2:#1a2445;
+  --gold:#e8c879; --gold2:#fff0c2; --mint:#c7c9ff; --white:#f6f5ff;
+  --muted:#c2c6df; --line:rgba(195,190,255,.22); --danger:#ffb4b4;
+}
+body{background:radial-gradient(ellipse at 15% 0%,rgba(93,82,190,.26),transparent 38%),radial-gradient(ellipse at 100% 20%,rgba(195,155,73,.12),transparent 32%),linear-gradient(145deg,#080d1d,#111a35 52%,#0a1025);color:#f6f5ff}
+.ambient:before{background:#7773e8;opacity:.20}.ambient:after{background:#d6ad54;opacity:.20}
+.ambient-geometry{background-image:repeating-linear-gradient(45deg,transparent 0 48px,rgba(231,200,121,.13) 49px 50px,transparent 51px 98px),repeating-linear-gradient(-45deg,transparent 0 48px,rgba(174,170,255,.13) 49px 50px,transparent 51px 98px)}
+#authGate{background:rgba(6,10,25,.93)}
+.auth-card{background:linear-gradient(145deg,rgba(28,37,70,.99),rgba(10,15,35,.99));border-color:rgba(195,190,255,.35)}
+.auth-fields input{background:#101831;color:#f6f5ff;border-color:rgba(195,190,255,.28)}
+.auth-fields input::placeholder{color:#9fa7c8}
+.auth-provider.guest{background:linear-gradient(120deg,#786bd7,#5552b8);color:#fff;border-color:#9288f2}
+.auth-provider.guest:hover{background:linear-gradient(120deg,#8b80e8,#6662cb)}
+/* Bring readable contrast to common cards, navigation and secondary text */
+.card,.feature-card,.prayer-card,.panel,.stat-card,.content-card{color:#f6f5ff}
+.brand-sub,.muted,.subtitle,.card p,.feature-card p,.prayer-card p{color:#c2c6df}
+
+/* Login removed: show the website directly. */
+#authGate{display:none!important}
+.app.auth-locked{filter:none!important;pointer-events:auto!important;user-select:auto!important}
+
+/* Unified navy-violet color for all formerly green content boxes */
+.panel,
+.stat-card,
+.card,
+.feature-card,
+.prayer-card,
+.content-card,
+.sidebar-card,
+.alarm-box,
+.prayer-row,
+.tasbeeh-card,
+.quran-card,
+.dhikr-card,
+.connection-card {
+  background: rgba(35, 39, 78, .55) !important;
+}
+/* Keep special highlighted prayer state readable while using the new palette */
+.prayer-row.next {
+  background: rgba(35, 39, 78, .72) !important;
+}
+
+
+
+/* Unified navy-blue theme: replace remaining green surfaces throughout the UI */
+:root{
+  --bg:#0b1024;
+  --bg2:#111a35;
+  --panel:rgba(28,37,70,.82);
+  --panel2:#1a2445;
+  --line:rgba(195,190,255,.22);
+  --muted:#c2c6df;
+}
+.nav-item{background:transparent;color:var(--muted);border-color:transparent}
+.nav-item:hover{background:rgba(35,39,78,.55);color:#f6f5ff}
+.nav-item.active{color:#f0d99c;background:linear-gradient(100deg,rgba(35,39,78,.95),rgba(28,37,70,.72));border-color:rgba(195,190,255,.24)}
+.sidebar-card{background:linear-gradient(145deg,rgba(35,39,78,.78),rgba(17,26,53,.92));border-color:rgba(195,190,255,.18)}
+.panel{background:linear-gradient(145deg,rgba(35,39,78,.92),rgba(17,26,53,.96));border-color:rgba(195,190,255,.20)}
+.stat-card{background:rgba(35,39,78,.55);border-color:rgba(195,190,255,.20)}
+.hero{background:radial-gradient(ellipse at 90% 10%,rgba(231,200,121,.12),transparent 37%),radial-gradient(ellipse at 10% 100%,rgba(119,115,232,.16),transparent 45%),linear-gradient(125deg,#191f41,#0f142d 70%);border-color:rgba(195,190,255,.20)}
+.btn:not(.btn-gold):not(.btn-danger){background:rgba(35,39,78,.55);border-color:rgba(195,190,255,.22)}
+.btn:not(.btn-gold):not(.btn-danger):hover{background:rgba(35,39,78,.82)}
+.btn-green{background:rgba(35,39,78,.72);border-color:rgba(155,155,255,.30);color:#e7e7ff}
+.prayer-row,.alarm-box{background:rgba(35,39,78,.55);border-color:rgba(195,190,255,.18)}
+.prayer-row.next{background:rgba(35,39,78,.82);border-color:rgba(231,200,121,.35)}
+.slider{background:#333b66}
+.counter-ring:before{background:#111a35}
+.compass-face{background:radial-gradient(circle,#252d56,#0b1024 70%);border-color:rgba(195,190,255,.30)}
+.compass-face:before{border-color:rgba(195,190,255,.22)}
+.chat-message.bot{background:rgba(35,39,78,.55);border-color:rgba(195,190,255,.20)}
+.avatar{background:rgba(119,115,232,.20);color:#d4d3ff}
+.bottom-nav{background:rgba(11,16,36,.96);border-color:rgba(195,190,255,.18)}
+.bottom-nav button.active{color:#f0d99c;background:rgba(35,39,78,.72)}
+
+
+/* Complete blue-theme override: all former green surfaces become blue; gold accents remain gold. */
+:root{--bg:#111a35;--bg2:#0b1024;--panel:rgba(35,39,78,.55);--panel2:#23274e;--mint:#c7c9ff;--muted:#c2c6df;}
+body{background:radial-gradient(ellipse at 15% 0%,rgba(85,82,184,.23),transparent 36%),radial-gradient(ellipse at 100% 20%,rgba(195,155,73,.10),transparent 32%),linear-gradient(145deg,#0b1024,#111a35 48%,#0b1024);}
+.topbar{background:rgba(11,16,36,.92);}
+.panel{background:linear-gradient(145deg,rgba(35,39,78,.82),rgba(17,26,53,.92));}
+.hero{background:radial-gradient(ellipse at 90% 10%,rgba(231,200,121,.14),transparent 37%),radial-gradient(ellipse at 10% 100%,rgba(85,82,184,.20),transparent 45%),linear-gradient(125deg,#23274e,#111a35 70%);}
+.stat-card,.feature-card,.tool-card,.prayer-card,.quran-card,.connection-card,.secure-connect,.secure-card{background-color:rgba(35,39,78,.55);}
+.nav-item.active{background:linear-gradient(100deg,rgba(195,190,255,.22),rgba(195,190,255,.06));border-color:rgba(195,190,255,.20);}
+.btn-green,.badge{background:rgba(85,82,184,.18);border-color:rgba(155,165,255,.25);}
+.ambient:before{background:#5552b8;}
+.ambient-geometry{background-image:repeating-linear-gradient(45deg,transparent 0 48px,rgba(231,200,121,.17) 49px 50px,transparent 51px 98px),repeating-linear-gradient(-45deg,transparent 0 48px,rgba(155,165,255,.12) 49px 50px,transparent 51px 98px);}
+
+</style>
+</head>
+
+<body>
+<div class="ambient" aria-hidden="true"></div>
+<canvas id="starCanvas" aria-hidden="true"></canvas>
+<div class="ambient-geometry" aria-hidden="true"></div>
+<div class="moon-glow" aria-hidden="true"></div>
+
+<div class="app" id="mainApp">
+<header class="topbar">
+  <a class="brand" href="#" onclick="navigate('home');return false">
+    <div class="brand-mark">☾</div>
+    <div>
+      <div class="brand-name">Noor Al-Islam</div>
+      <div class="brand-sub">YOUR SPIRITUAL SPACE</div>
+    </div>
+  </a>
+
+  <div class="top-actions">
+    <div class="clock-pill" id="clock">--:--:--</div>
+    <button class="icon-button" onclick="showView('settings')" aria-label="Settings">⚙</button>
+    <div class="profile" id="userAvatar" title="Your profile">A</div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="side-label">WORKSPACE</div>
+    <button class="nav-item active" data-view="home" onclick="showView('home')"><span class="nav-icon">⌂</span> Overview</button>
+    <button class="nav-item" data-view="quran" onclick="showView('quran')"><span class="nav-icon">۞</span> Quran Reader</button>
+    <button class="nav-item" data-view="prayer" onclick="showView('prayer')"><span class="nav-icon">☾</span> Prayer & Alarms</button>
+    <button class="nav-item" data-view="quiz" onclick="showView('quiz')"><span class="nav-icon">✦</span> Daily Quiz</button>
+    <button class="nav-item" data-view="tasbeeh" onclick="showView('tasbeeh')"><span class="nav-icon">◉</span> Digital Tasbeeh</button>
+    <button class="nav-item" data-view="ai" onclick="showView('ai')"><span class="nav-icon">✧</span> Noor AI Assistant</button>
+
+    <div class="side-label">YOUR JOURNEY</div>
+    <button class="nav-item" data-view="goals" onclick="showView('goals')"><span class="nav-icon">◷</span> Daily Goals</button>
+    <button class="nav-item" data-view="ranking" onclick="showView('ranking')"><span class="nav-icon">♜</span> Rankings</button>
+    <button class="nav-item" data-view="settings" onclick="showView('settings')"><span class="nav-icon">⚙</span> Settings</button>
+
+    <div class="sidebar-card">
+      <div class="gold">✦ Daily reminder</div>
+      <p>“And whoever puts their trust in Allah, then He is sufficient for them.”</p>
+      <span class="badge">Quran 65:3 · excerpt</span>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- HOME -->
+    <section class="view active" id="view-home">
+      <div class="hero">
+        <span class="hero-star one">✦</span>
+        <span class="hero-star two">✧</span>
+        <span class="hero-star three">✦</span>
+        <div class="hero-moon"></div>
+        <div class="hero-content">
+          <div class="eyebrow"></div>
+          <div class="bismillah arabic">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+          <h1>made by abdulrehman.<br><span class="gold">Noor Quran.</span></h1>
+          <p>A peaceful space for Quran reading, prayer reminders, dhikr, reflection and building meaningful daily habits.</p>
+          <div class="hero-actions">
+            <button class="btn btn-gold" onclick="showView('quran')">۞ &nbsp; Read Quran</button>
+            <button class="btn" onclick="showView('tasbeeh')">◉ &nbsp; Start Tasbeeh</button>
+          </div>
+          <div class="date-line">
+            <span id="todayDate">Today</span>
+            <span>✦</span>
+            <span id="greeting">Welcome back</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-head">
+        <div><h2>Your dashboard</h2><p>Your progress, one good habit at a time.</p></div>
+        <span class="badge">PERSONAL SPACE</span>
+      </div>
+
+      <div class="grid grid-4">
+        <div class="stat-card">
+          <div class="stat-top"><span class="muted small">Dhikr today</span><span class="stat-icon">📿</span></div>
+          <div class="stat-number" id="homeZikr">0</div>
+          <div class="stat-caption">Remembrances counted</div>
+          <div class="stat-foot">✦ Keep going</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><span class="muted small">Points earned</span><span class="stat-icon">✧</span></div>
+          <div class="stat-number" id="homePoints">0</div>
+          <div class="stat-caption">From your app activities</div>
+          <div class="stat-foot">✦ Every step counts</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><span class="muted small">Quran sessions</span><span class="stat-icon">۞</span></div>
+          <div class="stat-number" id="homeReads">0</div>
+          <div class="stat-caption">Reader sessions opened</div>
+          <div class="stat-foot">✦ Make time to reflect</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><span class="muted small">Daily goals</span><span class="stat-icon">◷</span></div>
+          <div class="stat-number" id="homeGoals">0/4</div>
+          <div class="stat-caption">Goals marked complete</div>
+          <div class="stat-foot">✦ Build consistency</div>
+        </div>
+      </div>
+
+      <div class="section-head"><div><h2>Quick access</h2><p>Your essential tools, always close.</p></div></div>
+      <div class="grid grid-3">
+        <button class="panel panel-pad" style="text-align:left;color:inherit" onclick="showView('prayer')">
+          <div class="stat-icon">🕌</div><h3 style="margin-top:14px">Prayer & Alarms</h3><p class="muted small" style="margin-top:8px">Manage prayer reminders and notification settings.</p>
+        </button>
+        <button class="panel panel-pad" style="text-align:left;color:inherit" onclick="showView('quiz')">
+          <div class="stat-icon">✦</div><h3 style="margin-top:14px">Daily Islamic Quiz</h3><p class="muted small" style="margin-top:8px">Test your knowledge with a quick question.</p>
+        </button>
+        <button class="panel panel-pad" style="text-align:left;color:inherit" onclick="showView('ai')">
+          <div class="stat-icon">✧</div><h3 style="margin-top:14px">Noor AI</h3><p class="muted small" style="margin-top:8px">Explore Islamic topics with a chat-style helper.</p>
+        </button>
+      </div>
+
+      <div class="section-head"><div><h2>Daily intention</h2><p>Make a little space for reflection.</p></div></div>
+      <div class="panel panel-pad">
+        <div class="arabic gold" style="font-size:25px">فَاذْكُرُونِي أَذْكُرْكُمْ</div>
+        <p class="muted small" style="margin-top:8px">“So remember Me; I will remember you.” — Quran 2:152, excerpt</p>
+      </div>
+    </section>
+
+    <!-- QURAN -->
+    <section class="view" id="view-quran">
+      <div class="section-head">
+        <div><div class="eyebrow">THE HOLY QURAN</div><h2>Quran Reader</h2><p>Read slowly. Reflect deeply.</p></div>
+        <span class="badge">READING SPACE</span>
+      </div>
+      <div class="panel panel-pad">
+        <div class="grid grid-2">
+          <div>
+            <label class="small muted" for="surahSelect">Choose a surah</label>
+            <select class="select" id="surahSelect" onchange="loadSurah()" style="margin-top:7px">
+              <option value="1">1 · Al-Fatiha</option>
+              <option value="112">112 · Al-Ikhlas</option>
+              <option value="113">113 · Al-Falaq</option>
+              <option value="114">114 · An-Nas</option>
+            </select>
+          </div>
+          <div>
+            <label class="small muted" for="translationSelect">Translation</label>
+            <select class="select" id="translationSelect" onchange="loadSurah()" style="margin-top:7px">
+              <option value="both">Arabic + English + Urdu</option>
+              <option value="en">Arabic + English</option>
+              <option value="ur">Arabic + Urdu</option>
+            </select>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div id="quranContent"></div>
+        <div class="divider"></div>
+        <div class="between">
+          <span class="muted small">Compact built-in sample text</span>
+          <button class="btn btn-green" onclick="markRead()">✓ Mark session complete</button>
+        </div>
+        <p class="muted small" style="margin-top:10px">This demo contains selected surahs, not the complete Quran. Verify translations and recitation against a trusted Quran edition.</p>
+      </div>
+    </section>
+
+    <!-- PRAYER -->
+    <section class="view" id="view-prayer">
+      <div class="section-head">
+        <div><div class="eyebrow">STAY CONNECTED</div><h2>Prayer & Alarms</h2><p>Set reminders that fit your local prayer schedule.</p></div>
+        <span class="badge">REMINDER CENTER</span>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="panel panel-pad">
+          <div class="between"><h3>Prayer reminders</h3><span class="badge">LOCAL DEMO</span></div>
+          <p class="muted small" style="margin:8px 0 18px">Enter your own verified local prayer times. Times below are examples, not live calculated times.</p>
+
+          <div class="prayer-list">
+            <div class="prayer-row">
+              <div class="row"><div class="prayer-symbol">🌅</div><div><div class="prayer-name">Fajr</div><div class="prayer-ar">الفجر</div></div></div>
+              <input class="input prayer-input" aria-label="Fajr time" data-prayer="Fajr" type="time" value="05:12" style="width:112px;padding:9px">
+              <label class="switch"><input type="checkbox" data-alarm="Fajr"><span class="slider"></span></label>
+            </div>
+            <div class="prayer-row">
+              <div class="row"><div class="prayer-symbol">☀️</div><div><div class="prayer-name">Dhuhr</div><div class="prayer-ar">الظهر</div></div></div>
+              <input class="input prayer-input" aria-label="Dhuhr time" data-prayer="Dhuhr" type="time" value="12:30" style="width:112px;padding:9px">
+              <label class="switch"><input type="checkbox" data-alarm="Dhuhr"><span class="slider"></span></label>
+            </div>
+            <div class="prayer-row">
+              <div class="row"><div class="prayer-symbol">🌤️</div><div><div class="prayer-name">Asr</div><div class="prayer-ar">العصر</div></div></div>
+              <input class="input prayer-input" aria-label="Asr time" data-prayer="Asr" type="time" value="16:32" style="width:112px;padding:9px">
+              <label class="switch"><input type="checkbox" data-alarm="Asr"><span class="slider"></span></label>
+            </div>
+            <div class="prayer-row">
+              <div class="row"><div class="prayer-symbol">🌇</div><div><div class="prayer-name">Maghrib</div><div class="prayer-ar">المغرب</div></div></div>
+              <input class="input prayer-input" aria-label="Maghrib time" data-prayer="Maghrib" type="time" value="18:55" style="width:112px;padding:9px">
+              <label class="switch"><input type="checkbox" data-alarm="Maghrib"><span class="slider"></span></label>
+            </div>
+            <div class="prayer-row">
+              <div class="row"><div class="prayer-symbol">🌙</div><div><div class="prayer-name">Isha</div><div class="prayer-ar">العشاء</div></div></div>
+              <input class="input prayer-input" aria-label="Isha time" data-prayer="Isha" type="time" value="20:15" style="width:112px;padding:9px">
+              <label class="switch"><input type="checkbox" data-alarm="Isha"><span class="slider"></span></label>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+          <button class="btn btn-gold" onclick="savePrayerSettings()">Save reminder settings</button>
+          <button class="btn" onclick="requestNotifications()">Enable browser notifications</button>
+        </div>
+
+        <div class="panel panel-pad">
+          <h3>Alarm control center</h3>
+          <p class="muted small" style="margin-top:8px">Choose an optional test alarm or test the notification sound.</p>
+          <div class="alarm-controls">
+            <div class="alarm-box">
+              <label for="testAlarmTime">Test alarm time</label>
+              <input class="input" id="testAlarmTime" type="time" value="18:00">
+            </div>
+            <div class="alarm-box">
+              <label for="testAlarmLabel">Reminder label</label>
+              <input class="input" id="testAlarmLabel" value="Personal reminder" maxlength="60">
+            </div>
+          </div>
+          <div class="row" style="margin-top:15px;flex-wrap:wrap">
+            <button class="btn btn-gold" onclick="setTestAlarm()">Set test alarm</button>
+            <button class="btn" onclick="testSound()">▶ Test sound</button>
+          </div>
+          <div class="divider"></div>
+          <div class="stat-card">
+            <div class="eyebrow">ALARM STATUS</div>
+            <h3 id="alarmStatus" style="margin:8px 0">No test alarm set</h3>
+            <p id="alarmDetails" class="muted small">Keep this page open for in-page reminders. Browser alarms are not guaranteed if the browser is closed or the device sleeps.</p>
+            <button class="btn btn-danger" id="cancelAlarmBtn" onclick="cancelTestAlarm()" style="margin-top:15px;display:none">Cancel test alarm</button>
+          </div>
+          <div class="divider"></div>
+          <p class="muted small">Browser notification permission is optional. Notification and sound behaviour depends on browser permissions and device settings.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- DAILY ISLAMIC QUIZ -->
+    <section class="view" id="view-quiz">
+      <div class="section-head">
+        <div><div class="eyebrow">LEARN A LITTLE EVERY DAY</div><h2>Daily Islamic Quiz</h2><p>Take a quick knowledge check and learn as you go.</p></div>
+        <span class="badge">DAILY CHALLENGE</span>
+      </div>
+      <div class="grid grid-2">
+        <div class="panel panel-pad">
+          <div class="stat-icon">✦</div>
+          <div class="eyebrow" style="margin-top:16px">QUESTION OF THE DAY</div>
+          <h3 id="quizQuestion" style="margin:12px 0 18px">Which month do Muslims observe fasting?</h3>
+          <div id="quizOptions" class="grid" style="gap:10px">
+            <button class="btn" onclick="answerQuiz(0)">Muharram</button>
+            <button class="btn" onclick="answerQuiz(1)">Ramadan</button>
+            <button class="btn" onclick="answerQuiz(2)">Shawwal</button>
+            <button class="btn" onclick="answerQuiz(3)">Rajab</button>
+          </div>
+          <p id="quizFeedback" class="muted small" aria-live="polite" style="margin-top:16px">Choose an answer to reveal a short explanation.</p>
+          <button class="btn btn-gold" style="margin-top:12px" onclick="nextQuizQuestion()">Next question →</button>
+        </div>
+        <div class="panel panel-pad">
+          <div class="eyebrow">WHY LEARN DAILY?</div><h3 style="margin:10px 0">Small steps, lasting knowledge</h3>
+          <p class="muted" style="line-height:1.8">Use this short quiz to revise basic Islamic knowledge. For detailed religious rulings, consult trusted scholars and reliable sources.</p>
+          <div class="divider"></div>
+          <div class="between"><span class="muted small">Correct answers this visit</span><strong class="gold" id="quizScore">0</strong></div>
+          <div class="between" style="margin-top:16px"><span class="muted small">Questions answered</span><strong id="quizAnswered">0</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TASBEEH -->
+    <section class="view" id="view-tasbeeh">
+      <div class="section-head">
+        <div><div class="eyebrow">REMEMBER & REFLECT</div><h2>Digital Tasbeeh</h2><p>Track your dhikr with a simple, focused counter.</p></div>
+        <span class="badge">DHIKR TRACKER</span>
+      </div>
+      <div class="grid grid-2">
+        <div class="panel tasbeeh-card">
+          <div class="quick-zikr">
+            <button class="btn btn-green" onclick="chooseZikr('subhan')">SubhanAllah</button>
+            <button class="btn" onclick="chooseZikr('hamd')">Alhamdulillah</button>
+            <button class="btn" onclick="chooseZikr('akbar')">Allahu Akbar</button>
+          </div>
+          <div class="eyebrow">CURRENT DHIKR</div>
+          <div class="tasbeeh-ar" id="tasbeehArabic">سُبْحَانَ اللَّهِ</div>
+          <p class="muted small" id="tasbeehMeaning">Glory be to Allah</p>
+          <div class="counter-ring" id="counterRing">
+            <div class="counter-inner">
+              <div class="counter-number" id="counterNumber">0</div>
+              <div class="muted small">OF <span id="counterTarget">33</span></div>
+            </div>
+          </div>
+          <button class="counter-button" onclick="incrementZikr()" aria-label="Increase tasbeeh count">+ &nbsp; COUNT</button>
+          <div class="row" style="justify-content:center;flex-wrap:wrap;margin-top:15px">
+            <button class="btn" onclick="resetZikr()">↺ Reset</button>
+            <button class="btn" onclick="changeTarget()">◎ Change target</button>
+          </div>
+          <p class="muted small" style="margin-top:15px">Your counter is saved in this browser when local storage is available.</p>
+        </div>
+
+        <div class="panel panel-pad">
+          <h3>Today's dhikr summary</h3>
+          <p class="muted small" style="margin-top:8px">Your total counts and progress for this device.</p>
+          <div class="grid grid-2" style="margin-top:20px">
+            <div class="stat-card"><div class="stat-caption">Total today</div><div class="stat-number" id="totalDhikr">0</div></div>
+            <div class="stat-card"><div class="stat-caption">Points earned</div><div class="stat-number" id="dhikrPoints">0</div></div>
+          </div>
+          <div class="section-head"><div><h3>Daily target</h3><p id="dhikrGoalText">0 of 100 remembrances</p></div></div>
+          <div class="progress"><div class="progress-fill" id="dhikrGoalProgress"></div></div>
+          <div class="divider"></div>
+          <div class="arabic gold" style="font-size:24px">أَسْتَغْفِرُ اللَّهَ</div>
+          <p class="muted small" style="margin-top:8px">Astaghfirullah — I seek forgiveness from Allah.</p>
+          <button class="btn btn-gold" style="margin-top:17px" onclick="chooseZikr('istighfar')">Start Istighfar</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- AI ASSISTANT -->
+    <section class="view" id="view-ai">
+      <div class="section-head">
+        <div><div class="eyebrow">YOUR STUDY COMPANION</div><h2>Noor AI Assistant</h2><p>A chat-style Islamic study helper for common questions and learning prompts.</p></div>
+        <span class="badge">DEMO MODE</span>
+      </div>
+      <div class="panel">
+        <div class="panel-pad" style="padding-bottom:10px">
+          <div class="row">
+            <div class="stat-icon">✧</div>
+            <div><h3>Noor Assistant</h3><p class="muted small">A friendly guide for general learning</p></div>
+          </div>
+        </div>
+        <div class="chat-window" id="chatWindow" aria-live="polite">
+          <div class="chat-message bot">Assalamu Alaikum! 🌿 I'm the Noor demo assistant. Ask about general Islamic topics, Quran study, dhikr or building a daily routine. My built-in answers are limited and are not a substitute for a qualified scholar.</div>
+        </div>
+        <div class="panel-pad" style="padding-top:0">
+          <div class="row" style="flex-wrap:wrap;margin-bottom:12px">
+            <button class="btn suggestion" onclick="askSuggestion('Help me create a daily worship routine')">Daily routine</button>
+            <button class="btn suggestion" onclick="askSuggestion('What is dhikr?')">What is dhikr?</button>
+            <button class="btn suggestion" onclick="askSuggestion('Help me start Quran reading')">Quran study</button>
+            <button class="btn suggestion" onclick="askSuggestion('Explain the five daily prayers')">Five prayers</button>
+          </div>
+        </div>
+        <form class="chat-form" onsubmit="sendChat(event)">
+          <input class="input" id="chatInput" maxlength="500" placeholder="Ask Noor a question..." autocomplete="off" aria-label="Ask Noor AI">
+          <button class="btn" type="button" onclick="startVoiceInput()" id="voiceBtn" title="Speak your question" aria-label="Speak your question">🎙</button>
+          <button class="btn btn-gold" type="submit">Send ↗</button>
+        </form>
+        <div class="between" style="padding:0 15px 15px;flex-wrap:wrap">
+          <span class="muted small" id="voiceStatus">Type a question or use voice input where supported.</span>
+          <button class="btn suggestion" type="button" onclick="clearChat()">Clear chat</button>
+        </div>
+      </div>
+      <div class="panel panel-pad" style="margin-top:17px">
+        <h3>Want real AI responses?</h3>
+        <p class="muted small" style="margin-top:8px">This page currently uses built-in demo replies, not a live AI model. To enable genuine AI chat, connect a model through a secure backend and keep the API key on the server—never paste a secret API key into this HTML file.</p>
+      </div>
+    </section>
+
+    <!-- GOALS -->
+    <section class="view" id="view-goals">
+      <div class="section-head">
+        <div><div class="eyebrow">SMALL STEPS, EVERY DAY</div><h2>Daily Goals</h2><p>Mark your own habits as you complete them.</p></div>
+        <span class="badge">PERSONAL TRACKER</span>
+      </div>
+      <div class="panel panel-pad">
+        <div class="between"><div><h3>Today's intentions</h3><p class="muted small" style="margin-top:5px">Your progress stays on this device.</p></div><strong class="gold" id="goalCount">0/4</strong></div>
+        <div class="progress" style="margin:18px 0 25px"><div class="progress-fill" id="goalProgress"></div></div>
+        <div id="goalList">
+          <div class="setting-row row"><input type="checkbox" class="goal-check" data-goal="quran" style="accent-color:#e7c879;width:18px;height:18px"><div style="flex:1"><strong>Read Quran</strong><p class="muted small">Make time for reading and reflection.</p></div><span>۞</span></div>
+          <div class="setting-row row"><input type="checkbox" class="goal-check" data-goal="prayer" style="accent-color:#e7c879;width:18px;height:18px"><div style="flex:1"><strong>Prayer check-in</strong><p class="muted small">Review your prayer schedule.</p></div><span>🕌</span></div>
+          <div class="setting-row row"><input type="checkbox" class="goal-check" data-goal="dhikr" style="accent-color:#e7c879;width:18px;height:18px"><div style="flex:1"><strong>Daily dhikr</strong><p class="muted small">Spend a moment in remembrance.</p></div><span>📿</span></div>
+          <div class="setting-row row"><input type="checkbox" class="goal-check" data-goal="reflection" style="accent-color:#e7c879;width:18px;height:18px"><div style="flex:1"><strong>Reflection</strong><p class="muted small">Write down one thing you're grateful for.</p></div><span>✦</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RANKING -->
+    <section class="view" id="view-ranking">
+      <div class="section-head">
+        <div><div class="eyebrow">YOUR PERSONAL PROGRESS</div><h2>Achievements & Rankings</h2><p>Celebrate consistency, not competition.</p></div>
+        <span class="badge">LOCAL DEMO</span>
+      </div>
+      <div class="grid grid-2">
+        <div class="panel panel-pad">
+          <h3>Your level</h3>
+          <div class="row" style="margin:20px 0">
+            <div class="stat-icon" style="width:60px;height:60px;font-size:26px">✧</div>
+            <div><div style="font-size:22px;font-weight:700" id="rankPoints">0 XP</div><div class="muted small">Consistency points</div></div>
+          </div>
+          <div class="between"><span class="muted small">Next milestone</span><span class="gold small" id="levelLabel">Level 1</span></div>
+          <div class="progress" style="margin:10px 0"><div class="progress-fill" id="levelProgress"></div></div>
+          <p class="muted small" id="levelMessage">Every meaningful habit begins with one step.</p>
+        </div>
+        <div class="panel panel-pad">
+          <h3>Achievements</h3>
+          <div class="rank-row"><div class="rank-number">01</div><div class="row"><div class="avatar">📿</div><div><div class="rank-name">First remembrance</div><div class="muted small">Count your first dhikr</div></div></div><span class="badge" id="badgeDhikr">LOCKED</span></div>
+          <div class="rank-row"><div class="rank-number">02</div><div class="row"><div class="avatar">۞</div><div><div class="rank-name">Quran explorer</div><div class="muted small">Complete a reader session</div></div></div><span class="badge" id="badgeQuran">LOCKED</span></div>
+          <div class="rank-row"><div class="rank-number">03</div><div class="row"><div class="avatar">✦</div><div><div class="rank-name">Goal keeper</div><div class="muted small">Complete all daily goals</div></div></div><span class="badge" id="badgeGoals">LOCKED</span></div>
+        </div>
+      </div>
+      <div class="panel panel-pad" style="margin-top:17px">
+        <h3>Sample leaderboard</h3>
+        <p class="muted small" style="margin-top:7px">Illustrative entries only. These are not real users or a live global ranking.</p>
+        <div class="rank-row"><div class="rank-number">01</div><div class="row"><div class="avatar">N</div><div><div class="rank-name">Noor Explorer</div><div class="muted small">Example account</div></div></div><span class="rank-points">2,400 XP</span></div>
+        <div class="rank-row"><div class="rank-number">02</div><div class="row"><div class="avatar">S</div><div><div class="rank-name">Sabr Seeker</div><div class="muted small">Example account</div></div></div><span class="rank-points">1,850 XP</span></div>
+        <div class="rank-row"><div class="rank-number">03</div><div class="row"><div class="avatar">H</div><div><div class="rank-name">Hopeful Heart</div><div class="muted small">Example account</div></div></div><span class="rank-points">1,200 XP</span></div>
+        <div class="rank-row"><div class="rank-number">★</div><div class="row"><div class="avatar">A</div><div><div class="rank-name">Your profile</div><div class="muted small">Your device's activity</div></div></div><span class="rank-points" id="yourRankPoints">0 XP</span></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="view" id="view-settings">
+      <div class="section-head">
+        <div><div class="eyebrow">MAKE IT YOURS</div><h2>Settings</h2><p>Personalise your experience and manage local data.</p></div>
+      </div>
+      <div class="panel panel-pad">
+        <div class="setting-row">
+          <div class="between"><div><strong>Display name</strong><p class="muted small">Used for your welcome message on this device.</p></div></div>
+          <div class="row" style="margin-top:12px"><input class="input" id="displayName" maxlength="35" placeholder="Enter your name"><button class="btn btn-gold" onclick="saveName()">Save</button></div>
+        </div>
+        <div class="setting-row">
+          <div class="between"><div><strong>Sound test</strong><p class="muted small">Play a short sound when you press the test button.</p></div><button class="btn" onclick="testSound()">▶ Test</button></div>
+        </div>
+        <div class="setting-row">
+          <div><strong>Reset local progress</strong><p class="muted small" style="margin-top:5px">Clears saved counter, points, reading sessions and goals on this browser.</p></div>
+          <button class="btn btn-danger" style="margin-top:12px" onclick="resetAllData()">Reset my progress</button>
+        </div>
+        <div class="setting-row">
+          <strong>About this version</strong>
+          <p class="muted small" style="margin-top:7px">Single-file frontend demo. No account system, live prayer calculation, backend AI or real global ranking is connected.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<nav class="bottom-nav" aria-label="Mobile navigation">
+  <button class="active" data-view="home" onclick="showView('home')"><span>⌂</span>Home</button>
+  <button data-view="quran" onclick="showView('quran')"><span>۞</span>Quran</button>
+  <button data-view="prayer" onclick="showView('prayer')"><span>🕌</span>Prayer</button>
+  <button data-view="quiz" onclick="showView('quiz')"><span>✦</span>Quiz</button>
+  <button data-view="tasbeeh" onclick="showView('tasbeeh')"><span>📿</span>Dhikr</button>
+  <button data-view="ai" onclick="showView('ai')"><span>✧</span>AI</button>
+</nav>
+
+<footer>NOOR AL-ISLAM · A PEACEFUL SPACE FOR YOUR SPIRITUAL JOURNEY</footer>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+
+
+/* ---------- Animated night sky ---------- */
+(function startStarfield(){
+  const canvas=document.getElementById("starCanvas");
+  if(!canvas) return;
+  const ctx=canvas.getContext("2d");
+  if(!ctx) return;
+  let width=0,height=0,stars=[],shooting=[],raf=0;
+  const reduced=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function resize(){
+    const dpr=Math.min(window.devicePixelRatio||1,2);
+    width=window.innerWidth;height=window.innerHeight;
+    canvas.width=Math.floor(width*dpr);canvas.height=Math.floor(height*dpr);
+    canvas.style.width=width+"px";canvas.style.height=height+"px";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    const count=Math.min(230,Math.max(95,Math.floor(width*height/6500)));
+    stars=Array.from({length:count},()=>({
+      x:Math.random()*width,y:Math.random()*height,
+      r:Math.random()*1.9+.45,alpha:Math.random()*.65+.30,
+      speed:Math.random()*.003+.001,phase:Math.random()*Math.PI*2,
+      drift:(Math.random()-.5)*.20
+    }));
+    draw(0);
+  }
+  function draw(t){
+    ctx.clearRect(0,0,width,height);
+    // Occasional bright shooting stars make the motion clearly visible.
+    if(!reduced && Math.random()<.035 && shooting.length<3){
+      shooting.push({x:Math.random()*width*.85,y:Math.random()*height*.48,
+        vx:5+Math.random()*5,vy:2+Math.random()*3,life:0,max:35+Math.random()*25});
+    }
+    for(let i=shooting.length-1;i>=0;i--){
+      const sh=shooting[i]; sh.x+=sh.vx; sh.y+=sh.vy; sh.life++;
+      const fade=1-sh.life/sh.max;
+      const grad=ctx.createLinearGradient(sh.x-sh.vx*8,sh.y-sh.vy*8,sh.x,sh.y);
+      grad.addColorStop(0,"rgba(255,226,151,0)");
+      grad.addColorStop(1,"rgba(255,246,205,"+fade+")");
+      ctx.strokeStyle=grad;ctx.lineWidth=2.2;ctx.beginPath();
+      ctx.moveTo(sh.x-sh.vx*8,sh.y-sh.vy*8);ctx.lineTo(sh.x,sh.y);ctx.stroke();
+      ctx.beginPath();ctx.arc(sh.x,sh.y,2.1,0,Math.PI*2);
+      ctx.fillStyle="rgba(255,250,220,"+fade+")";ctx.fill();
+      if(sh.life>sh.max || sh.x>width+50 || sh.y>height+50) shooting.splice(i,1);
+    }
+    for(const st of stars){
+      const twinkle=reduced?1:(Math.sin(t*st.speed+st.phase)+1)/2;
+      const a=st.alpha*(.72+twinkle*.65);
+      ctx.beginPath();ctx.arc(st.x,st.y,st.r,0,Math.PI*2);
+      ctx.fillStyle="rgba(255,231,174,"+a+")";ctx.fill();
+      if(st.r>1.15){
+        ctx.strokeStyle="rgba(255,220,130,"+(a*.58)+")";ctx.lineWidth=.6;
+        ctx.beginPath();ctx.moveTo(st.x-st.r*2.3,st.y);ctx.lineTo(st.x+st.r*2.3,st.y);
+        ctx.moveTo(st.x,st.y-st.r*2.3);ctx.lineTo(st.x,st.y+st.r*2.3);ctx.stroke();
+      }
+      if(!reduced){st.y-=.025;st.x+=st.drift;if(st.y< -2)st.y=height+2;if(st.x< -2)st.x=width+2;if(st.x>width+2)st.x=-2;}
+    }
+    if(!reduced) raf=requestAnimationFrame(draw);
+  }
+  window.addEventListener("resize",resize,{passive:true});
+  resize();
+  if(!reduced) raf=requestAnimationFrame(draw);
+})();
+
+/* ---------- Safe local state ---------- */
+const STORE_KEY = "noor_islam_superapp_v1";
+
+const defaultState = {
+  zikrCount: 0,
+  totalZikr: 0,
+  points: 0,
+  reads: 0,
+  target: 33,
+  zikrType: "subhan",
+  goals: {quran:false, prayer:false, dhikr:false, reflection:false},
+  name: "",
+  alarmSettings: {},
+  testAlarm: null
+};
+
+let state = loadState();
+let testAlarmTimer = null;
+let toastTimer = null;
+let deviceHeading = null;
+let quizIndex=0;
+let quizScore=0;
+let quizAnswered=0;
+const quizQuestions=[
+ {q:"Which month do Muslims observe fasting?",o:["Muharram","Ramadan","Shawwal","Rajab"],a:1,e:"Ramadan is the month of fasting in Islam."},
+ {q:"How many daily obligatory prayers are there?",o:["Three","Four","Five","Six"],a:2,e:"Muslims are obligated to perform five daily prayers."},
+ {q:"Which is the holy book of Islam?",o:["The Torah","The Quran","The Psalms","The Vedas"],a:1,e:"The Quran is the holy book of Islam."},
+ {q:"In which city is the Kaaba located?",o:["Madinah","Jerusalem","Makkah","Cairo"],a:2,e:"The Kaaba is in the Masjid al-Haram in Makkah."},
+ {q:"What is the name of the charity obligatory for eligible Muslims?",o:["Zakat","Sawm","Hajj","Adhan"],a:0,e:"Zakat is obligatory charity for Muslims who meet its conditions."}
+];
+
+function loadState(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
+    if(!saved) return structuredCloneSafe(defaultState);
+    return {
+      ...structuredCloneSafe(defaultState),
+      ...saved,
+      goals:{...defaultState.goals,...(saved.goals || {})},
+      alarmSettings:saved.alarmSettings || {}
+    };
+  }catch(e){
+    return structuredCloneSafe(defaultState);
+  }
+}
+function structuredCloneSafe(value){
+  return JSON.parse(JSON.stringify(value));
+}
+function saveState(){
+  try{
+    localStorage.setItem(STORE_KEY,JSON.stringify(state));
+  }catch(e){
+    showToast("Browser storage unavailable. Progress may not persist.");
+  }
+}
+
+/* ---------- Toast ---------- */
+function showToast(message){
+  const el=document.getElementById("toast");
+  if(!el) return;
+  el.textContent=message;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove("show"),2800);
+}
+
+/* ---------- Navigation ---------- */
+function navigate(view){showView(view)}
+function showView(view){
+  const target=document.getElementById("view-"+view);
+  if(!target) return;
+
+  document.querySelectorAll(".view").forEach(el=>el.classList.remove("active"));
+  target.classList.add("active");
+
+  document.querySelectorAll("[data-view]").forEach(el=>{
+    el.classList.toggle("active",el.dataset.view===view);
+  });
+
+  if(view==="quran") loadSurah();
+  if(view==="quiz") renderQuiz();
+  if(view==="goals") syncGoals();
+  if(view==="ranking") updateRanking();
+
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* ---------- Clock and greeting ---------- */
+function updateClock(){
+  const now=new Date();
+  document.getElementById("clock").textContent=now.toLocaleTimeString([],{
+    hour:"2-digit",minute:"2-digit",second:"2-digit"
+  });
+  document.getElementById("todayDate").textContent=now.toLocaleDateString([],{
+    weekday:"long",month:"long",day:"numeric"
+  });
+  document.getElementById("greeting").textContent=
+    "Welcome"+(state.name ? ", "+state.name : " back");
+}
+
+/* ---------- Quran sample ---------- */
+const quranData={
+  "1":[
+    ["بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ","In the name of Allah, the Most Compassionate, Most Merciful.","اللہ کے نام سے جو نہایت مہربان، بے حد رحم فرمانے والا ہے۔"],
+    ["الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ","All praise is for Allah—Lord of all worlds.","سب تعریف اللہ ہی کے لیے ہے جو تمام جہانوں کا رب ہے۔"],
+    ["الرَّحْمَٰنِ الرَّحِيمِ","The Most Compassionate, Most Merciful.","نہایت مہربان، بے حد رحم فرمانے والا۔"],
+    ["مَالِكِ يَوْمِ الدِّينِ","Master of the Day of Judgment.","روزِ جزا کا مالک۔"],
+    ["إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ","You alone we worship and You alone we ask for help.","ہم تیری ہی عبادت کرتے ہیں اور تجھ ہی سے مدد مانگتے ہیں۔"],
+    ["اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ","Guide us along the Straight Path.","ہمیں سیدھے راستے پر چلا۔"],
+    ["صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ","The path of those You have blessed—not those who earned Your anger or went astray.","ان لوگوں کا راستہ جن پر تو نے انعام فرمایا، نہ کہ ان کا جن پر غضب ہوا اور نہ گمراہوں کا۔"]
+  ],
+  "112":[
+    ["قُلْ هُوَ اللَّهُ أَحَدٌ","Say, He is Allah, the One.","کہہ دیجیے: وہ اللہ ایک ہے۔"],
+    ["اللَّهُ الصَّمَدُ","Allah, the Eternal Refuge.","اللہ بے نیاز ہے۔"],
+    ["لَمْ يَلِدْ وَلَمْ يُولَدْ","He neither begets nor is born.","نہ اس نے کسی کو جنا اور نہ وہ جنا گیا۔"],
+    ["وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ","And there is none comparable to Him.","اور کوئی اس کے برابر نہیں۔"]
+  ],
+  "113":[
+    ["قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ","Say, I seek refuge in the Lord of daybreak.","کہہ دیجیے: میں صبح کے رب کی پناہ مانگتا ہوں۔"],
+    ["مِن شَرِّ مَا خَلَقَ","From the evil of what He created.","اس کی پیدا کی ہوئی چیزوں کے شر سے۔"],
+    ["وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ","And from the evil of darkness when it settles.","اور اندھیری رات کے شر سے جب وہ چھا جائے۔"],
+    ["وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ","And from the evil of those who blow on knots.","اور گرہوں میں پھونکنے والیوں کے شر سے۔"],
+    ["وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ","And from the evil of an envier when they envy.","اور حسد کرنے والے کے شر سے جب وہ حسد کرے۔"]
+  ],
+  "114":[
+    ["قُلْ أَعُوذُ بِرَبِّ النَّاسِ","Say, I seek refuge in the Lord of mankind.","کہہ دیجیے: میں انسانوں کے رب کی پناہ مانگتا ہوں۔"],
+    ["مَلِكِ النَّاسِ","The King of mankind.","انسانوں کے بادشاہ کی۔"],
+    ["إِلَٰهِ النَّاسِ","The God of mankind.","انسانوں کے معبود کی۔"],
+    ["مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ","From the evil of the retreating whisperer.","وسوسہ ڈالنے والے کے شر سے۔"],
+    ["الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ","Who whispers in the hearts of mankind.","جو لوگوں کے سینوں میں وسوسہ ڈالتا ہے۔"],
+    ["مِنَ الْجِنَّةِ وَالنَّاسِ","From among jinn and mankind.","جنوں اور انسانوں میں سے۔"]
+  ]
+};
+
+function loadSurah(){
+  const id=document.getElementById("surahSelect").value;
+  const mode=document.getElementById("translationSelect").value;
+  const data=quranData[id] || [];
+  const container=document.getElementById("quranContent");
+
+  container.innerHTML=data.map((v,i)=>`
+    <article class="quran-verse">
+      <div class="verse-number">VERSE ${i+1}</div>
+      <div class="verse-ar">${v[0]}</div>
+      ${mode!=="ur"?`<div class="verse-en">${escapeHTML(v[1])}</div>`:""}
+      ${mode!=="en"?`<div class="verse-ur">${escapeHTML(v[2])}</div>`:""}
+    </article>
+  `).join("");
+}
+function markRead(){
+  state.reads++;
+  state.points+=10;
+  saveState();
+  updateDashboard();
+  updateRanking();
+  showToast("Reading session recorded on this device. +10 points");
+}
+
+/* ---------- Tasbeeh ---------- */
+const zikrOptions={
+  subhan:{ar:"سُبْحَانَ اللَّهِ",meaning:"Glory be to Allah",target:33},
+  hamd:{ar:"الْحَمْدُ لِلَّهِ",meaning:"All praise belongs to Allah",target:33},
+  akbar:{ar:"اللَّهُ أَكْبَرُ",meaning:"Allah is the Greatest",target:34},
+  istighfar:{ar:"أَسْتَغْفِرُ اللَّهَ",meaning:"I seek forgiveness from Allah",target:100}
+};
+
+function chooseZikr(type){
+  if(!zikrOptions[type]) return;
+  state.zikrType=type;
+  state.target=zikrOptions[type].target;
+  state.zikrCount=0;
+  saveState();
+  renderTasbeeh();
+}
+function incrementZikr(){
+  state.zikrCount++;
+  state.totalZikr++;
+  state.points++;
+  saveState();
+  renderTasbeeh();
+  updateDashboard();
+  updateRanking();
+
+  if(state.zikrCount===state.target){
+    showToast("Target reached. Alhamdulillah! 🌿");
+  }
+}
+function resetZikr(){
+  state.zikrCount=0;
+  saveState();
+  renderTasbeeh();
+  showToast("Counter reset.");
+}
+function changeTarget(){
+  const input=prompt("Enter a target between 1 and 10000:",String(state.target));
+  if(input===null) return;
+  const value=Number(input);
+  if(!Number.isInteger(value)||value<1||value>10000){
+    showToast("Please enter a whole number from 1 to 10000.");
+    return;
+  }
+  state.target=value;
+  saveState();
+  renderTasbeeh();
+}
+function renderTasbeeh(){
+  const type=zikrOptions[state.zikrType]||zikrOptions.subhan;
+  document.getElementById("tasbeehArabic").textContent=type.ar;
+  document.getElementById("tasbeehMeaning").textContent=type.meaning;
+  document.getElementById("counterNumber").textContent=state.zikrCount;
+  document.getElementById("counterTarget").textContent=state.target;
+  const percent=Math.min(100,state.zikrCount/state.target*100);
+  document.getElementById("counterRing").style.setProperty("--ring",percent+"%");
+  document.getElementById("totalDhikr").textContent=state.totalZikr;
+  document.getElementById("dhikrPoints").textContent=state.points;
+  document.getElementById("dhikrGoalText").textContent=Math.min(state.totalZikr,100)+" of 100 remembrances";
+  document.getElementById("dhikrGoalProgress").style.width=Math.min(100,state.totalZikr)+"%";
+}
+
+/* ---------- Goals ---------- */
+function syncGoals(){
+  document.querySelectorAll(".goal-check").forEach(el=>{
+    el.checked=!!state.goals[el.dataset.goal];
+  });
+  updateGoals();
+}
+function updateGoals(){
+  const checks=[...document.querySelectorAll(".goal-check")];
+  const done=checks.filter(el=>el.checked).length;
+  const percent=checks.length?done/checks.length*100:0;
+  document.getElementById("goalCount").textContent=done+"/"+checks.length;
+  document.getElementById("goalProgress").style.width=percent+"%";
+  document.getElementById("homeGoals").textContent=done+"/"+checks.length;
+  document.getElementById("badgeGoals").textContent=done===checks.length?"UNLOCKED":"LOCKED";
+}
+document.querySelectorAll(".goal-check").forEach(el=>{
+  el.addEventListener("change",()=>{
+    const wasDone=!!state.goals[el.dataset.goal];
+    state.goals[el.dataset.goal]=el.checked;
+    if(el.checked&&!wasDone) state.points+=5;
+    saveState();
+    updateGoals();
+    updateDashboard();
+    updateRanking();
+  });
+});
+
+/* ---------- Dashboard and ranking ---------- */
+function updateDashboard(){
+  document.getElementById("homeZikr").textContent=state.totalZikr;
+  document.getElementById("homePoints").textContent=state.points;
+  document.getElementById("homeReads").textContent=state.reads;
+  document.getElementById("badgeDhikr").textContent=state.totalZikr>0?"UNLOCKED":"LOCKED";
+  document.getElementById("badgeQuran").textContent=state.reads>0?"UNLOCKED":"LOCKED";
+  updateGoals();
+}
+function updateRanking(){
+  document.getElementById("rankPoints").textContent=state.points+" XP";
+  document.getElementById("yourRankPoints").textContent=state.points+" XP";
+  const level=Math.floor(state.points/100)+1;
+  const progress=state.points%100;
+  document.getElementById("levelLabel").textContent="Level "+level;
+  document.getElementById("levelProgress").style.width=progress+"%";
+  document.getElementById("levelMessage").textContent=
+    (100-progress)+" points to your next level milestone.";
+}
+
+/* ---------- Prayer reminder settings ---------- */
+function savePrayerSettings(){
+  const settings={};
+  document.querySelectorAll("[data-prayer]").forEach(input=>{
+    const name=input.dataset.prayer;
+    const enabled=document.querySelector('[data-alarm="'+name+'"]').checked;
+    settings[name]={time:input.value,enabled};
+  });
+  state.alarmSettings=settings;
+  saveState();
+  showToast("Prayer reminder preferences saved on this device.");
+}
+function restorePrayerSettings(){
+  Object.entries(state.alarmSettings||{}).forEach(([name,value])=>{
+    const input=document.querySelector('[data-prayer="'+name+'"]');
+    const toggle=document.querySelector('[data-alarm="'+name+'"]');
+    if(input&&value.time) input.value=value.time;
+    if(toggle) toggle.checked=!!value.enabled;
+  });
+}
+async function requestNotifications(){
+  if(!("Notification" in window)){
+    showToast("This browser does not support notifications.");
+    return;
+  }
+  try{
+    const result=await Notification.requestPermission();
+    showToast(result==="granted"?"Browser notifications enabled.":"Notification permission was not granted.");
+  }catch(e){
+    showToast("Unable to request notification permission.");
+  }
+}
+function notifyUser(title,message){
+  showToast(title+": "+message);
+  if("Notification" in window && Notification.permission==="granted"){
+    try{new Notification(title,{body:message});}catch(e){}
+  }
+}
+
+/* Test alarm — works while this page remains active */
+function setTestAlarm(){
+  const time=document.getElementById("testAlarmTime").value;
+  const label=document.getElementById("testAlarmLabel").value.trim()||"Personal reminder";
+  if(!time){showToast("Please select an alarm time.");return;}
+  const [hours,minutes]=time.split(":").map(Number);
+  const now=new Date();
+  const alarm=new Date();
+  alarm.setHours(hours,minutes,0,0);
+  if(alarm<=now) alarm.setDate(alarm.getDate()+1);
+
+  clearTimeout(testAlarmTimer);
+  state.testAlarm={time,label,fireAt:alarm.getTime()};
+  saveState();
+  updateAlarmStatus();
+
+  const delay=alarm.getTime()-Date.now();
+  testAlarmTimer=setTimeout(()=>{
+    notifyUser("Noor reminder",label);
+    testSound();
+    state.testAlarm=null;
+    saveState();
+    updateAlarmStatus();
+  },Math.min(delay,2147480000));
+
+  showToast("Test alarm set for "+alarm.toLocaleString());
+}
+function updateAlarmStatus(){
+  const alarm=state.testAlarm;
+  document.getElementById("alarmStatus").textContent=alarm?"Next: "+alarm.label:"No test alarm set";
+  document.getElementById("alarmDetails").textContent=alarm?
+    "Scheduled for "+new Date(alarm.fireAt).toLocaleString()+". Keep this page open for the reminder.":
+    "Keep this page open for in-page reminders. Browser alarms are not guaranteed if the browser is closed or the device sleeps.";
+  document.getElementById("cancelAlarmBtn").style.display=alarm?"inline-flex":"none";
+}
+function cancelTestAlarm(){
+  clearTimeout(testAlarmTimer);
+  state.testAlarm=null;
+  saveState();
+  updateAlarmStatus();
+  showToast("Test alarm cancelled.");
+}
+function testSound(){
+  try{
+    const AudioContextClass=window.AudioContext||window.webkitAudioContext;
+    if(!AudioContextClass){showToast("Audio is not supported by this browser.");return;}
+    const ctx=new AudioContextClass();
+    const oscillator=ctx.createOscillator();
+    const gain=ctx.createGain();
+    oscillator.type="sine";
+    oscillator.frequency.setValueAtTime(660,ctx.currentTime);
+    oscillator.frequency.setValueAtTime(880,ctx.currentTime+.15);
+    gain.gain.setValueAtTime(.001,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(.12,ctx.currentTime+.03);
+    gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.5);
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+    oscillator.start();
+    oscillator.stop(ctx.currentTime+.52);
+    oscillator.onended=()=>ctx.close();
+  }catch(e){
+    showToast("Could not play audio. Check browser permissions.");
+  }
+}
+
+/* ---------- Daily Islamic quiz ---------- */
+function renderQuiz(){
+  const item=quizQuestions[quizIndex%quizQuestions.length];
+  document.getElementById("quizQuestion").textContent=item.q;
+  document.getElementById("quizOptions").innerHTML=item.o.map((option,i)=>`<button class="btn" onclick="answerQuiz(${i})">${option}</button>`).join("");
+  document.getElementById("quizFeedback").textContent="Choose an answer to reveal a short explanation.";
+  document.getElementById("quizScore").textContent=quizScore;
+  document.getElementById("quizAnswered").textContent=quizAnswered;
+}
+function answerQuiz(choice){
+  const item=quizQuestions[quizIndex%quizQuestions.length];
+  const buttons=document.querySelectorAll("#quizOptions button");
+  if(buttons.length===0 || buttons[0].disabled)return;
+  buttons.forEach(button=>button.disabled=true);
+  quizAnswered++;
+  if(choice===item.a){quizScore++;document.getElementById("quizFeedback").textContent="Correct! "+item.e;}
+  else{document.getElementById("quizFeedback").textContent="Not quite. "+item.e;}
+  document.getElementById("quizScore").textContent=quizScore;
+  document.getElementById("quizAnswered").textContent=quizAnswered;
+}
+function nextQuizQuestion(){quizIndex=(quizIndex+1)%quizQuestions.length;renderQuiz();}
+
+/* ---------- Noor AI demo assistant ---------- */
+function addMessage(text,role){
+  const windowEl=document.getElementById("chatWindow");
+  const message=document.createElement("div");
+  message.className="chat-message "+role;
+  message.textContent=text;
+  windowEl.appendChild(message);
+  windowEl.scrollTop=windowEl.scrollHeight;
+}
+function getDemoReply(question){
+  const q=question.toLowerCase();
+
+  if(q.includes("السلام")||q.includes("اسلام علیکم")||q.includes("assalamu")||q.includes("salam")||q.includes("सलाम")||q.includes("अस्सलाम")) {
+    return "Wa Alaikum Assalam wa Rahmatullahi wa Barakatuh. 🌿 Noor में आपका स्वागत है! आप कुरआन पढ़ने, ज़िक्र, नमाज़ की दिनचर्या या क़िबला के बारे में पूछ सकते हैं।";
+  }
+  if(q.includes("नमाज़")||q.includes("namaz")||q.includes("نماز")||q.includes("prayer")||q.includes("salah")) {
+    return "पाँच फ़र्ज़ नमाज़ें फ़ज्र, ज़ुहर, अस्र, मग़रिब और इशा हैं। इनके समय तारीख़, स्थान और गणना-पद्धति के अनुसार बदलते हैं। अपने इलाके की विश्वसनीय समय-सारणी देखकर यहाँ सही समय भरें।";
+  }
+  if(q.includes("कुरान")||q.includes("क़ुरआन")||q.includes("قرآن")||q.includes("quran")||q.includes("surah")) {
+    return "क़ुरआन पढ़ने के लिए थोड़ा-सा नियमित समय रखें, तिलावत ध्यान से करें और अर्थ समझने के लिए भरोसेमंद अनुवाद देखें। इस डेमो रीडर में कुछ चुनी हुई सूरतें हैं, पूरा क़ुरआन नहीं।";
+  }
+  if(q.includes("ज़िक्र")||q.includes("जिक्र")||q.includes("ذکر")||q.includes("tasbeeh")||q.includes("dhikr")) {
+    return "ज़िक्र अल्लाह को याद करने को कहते हैं। आप सुब्हानअल्लाह, अल्हम्दुलिल्लाह और अल्लाहु अकबर पढ़ सकते हैं। काउंटर केवल गिनती में मदद करता है—ध्यान और इख़लास को प्राथमिकता दें।";
+  }
+  if(q.includes("routine")||q.includes("daily")){
+    return "Try a manageable routine: begin with your intention, follow your local prayer schedule, set aside a short Quran reading period, include dhikr, and review your day with gratitude. Adjust the plan to your circumstances rather than making it overwhelming.";
+  }
+  if(q.includes("dhikr")||q.includes("zikr")||q.includes("tasbeeh")){
+    return "Dhikr means remembering Allah. You can set aside a quiet moment for phrases such as SubhanAllah, Alhamdulillah and Allahu Akbar. Use the counter to track repetitions if helpful, while keeping attention and sincerity at the centre.";
+  }
+  if(q.includes("quran")||q.includes("surah")||q.includes("reading")){
+    return "Start with a small, sustainable amount of Quran reading. Read carefully, use a trusted translation when needed, and consult a qualified teacher for pronunciation and tajweed. This demo's built-in reader contains selected surahs only.";
+  }
+  if(q.includes("prayer")||q.includes("salah")||q.includes("namaz")){
+    return "The five daily prayers are Fajr, Dhuhr, Asr, Maghrib and Isha. Their times vary by date, location and calculation method. Check a trusted local timetable or prayer-time service and enter verified times in the reminder section.";
+  }
+  if(q.includes("qibla")||q.includes("kaaba")||q.includes("direction")){
+    return "The Qibla is the direction towards the Kaaba in Makkah. Use the compass tool with location and sensor permissions enabled, and verify the result if the device compass is inaccurate.";
+  }
+  if(q.includes("hadith")||q.includes("sunnah")){
+    return "When studying a hadith, check its exact wording, source, reference and authenticity with reliable scholarly resources. This demo cannot independently verify every narration or provide a binding religious ruling.";
+  }
+  if(q.includes("halal")||q.includes("haram")||q.includes("ruling")||q.includes("fatwa")){
+    return "For a personal halal/haram question, details and scholarly interpretation can matter. Consult a qualified scholar or trusted local religious authority. I can help organise your question or explain general terminology, but this demo is not a source of binding fatwas.";
+  }
+  return "I can offer a few built-in suggestions about Quran study, dhikr, prayer routines and the Qibla. This demo does not connect to a live AI model, so I may not understand every question. For specific religious rulings, please consult a qualified scholar.";
+}
+function sendChat(event){
+  event.preventDefault();
+  const input=document.getElementById("chatInput");
+  const question=input.value.trim();
+  if(!question)return;
+  addMessage(question,"user");
+  input.value="";
+  setTimeout(()=>addMessage(getDemoReply(question),"bot"),180);
+}
+function askSuggestion(question){
+  addMessage(question,"user");
+  setTimeout(()=>addMessage(getDemoReply(question),"bot"),180);
+}
+
+
+/* ---------- Voice input and chat controls ---------- */
+let speechRecognition=null;
+function startVoiceInput(){
+  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const status=document.getElementById("voiceStatus");
+  if(!SpeechRecognition){
+    status.textContent="Voice input is not supported here; please type your question.";
+    showToast("Voice input is not supported in this browser.");
+    return;
+  }
+  try{
+    speechRecognition=new SpeechRecognition();
+    speechRecognition.lang=/[\u0600-\u06FF]/.test(document.getElementById("chatInput").value)?"ur-PK":"en-US";
+    speechRecognition.interimResults=false;
+    speechRecognition.maxAlternatives=1;
+    const button=document.getElementById("voiceBtn");
+    button.disabled=true;status.textContent="Listening… speak your question now.";
+    speechRecognition.onresult=(event)=>{
+      const transcript=event.results&&event.results[0]&&event.results[0][0]?event.results[0][0].transcript:"";
+      if(transcript) document.getElementById("chatInput").value=transcript;
+      status.textContent=transcript?"Voice captured. Press Send to ask Noor.":"No speech detected.";
+    };
+    speechRecognition.onerror=()=>{status.textContent="Voice input stopped. You can type instead.";};
+    speechRecognition.onend=()=>{button.disabled=false;};
+    speechRecognition.start();
+  }catch(e){
+    status.textContent="Could not start voice input. Please type instead.";
+    const button=document.getElementById("voiceBtn");if(button)button.disabled=false;
+  }
+}
+function clearChat(){
+  const box=document.getElementById("chatWindow");
+  box.replaceChildren();
+  addMessage("Assalamu Alaikum! 🌿 I'm the Noor demo assistant. Ask about general Islamic topics, Quran study, dhikr or building a daily routine. My built-in answers are limited and are not a substitute for a qualified scholar.","bot");
+  showToast("Chat cleared.");
+}
+
+/* ---------- Settings ---------- */
+function saveName(){
+  state.name=document.getElementById("displayName").value.trim().slice(0,35);
+  saveState();
+  updateClock();
+  showToast("Display name saved.");
+}
+function resetAllData(){
+  const confirmed=confirm("Reset all saved Noor Al-Islam progress on this browser? This cannot be undone.");
+  if(!confirmed)return;
+  clearTimeout(testAlarmTimer);
+  state=structuredCloneSafe(defaultState);
+  saveState();
+  renderTasbeeh();
+  updateDashboard();
+  updateRanking();
+  syncGoals();
+  updateAlarmStatus();
+  document.getElementById("displayName").value="";
+  document.querySelectorAll("[data-alarm]").forEach(el=>el.checked=false);
+  document.querySelectorAll("[data-prayer]").forEach(el=>{
+    const defaults={Fajr:"05:12",Dhuhr:"12:30",Asr:"16:32",Maghrib:"18:55",Isha:"20:15"};
+    el.value=defaults[el.dataset.prayer];
+  });
+  showToast("Local progress has been reset.");
+}
+
+/* ---------- Escape text for generated HTML ---------- */
+function escapeHTML(value){
+  return String(value).replace(/[&<>"']/g,char=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[char]));
+}
+
+/* ---------- Start ---------- */
+function init(){
+  document.getElementById("displayName").value=state.name||"";
+  restorePrayerSettings();
+  renderTasbeeh();
+  updateDashboard();
+  updateRanking();
+  syncGoals();
+  updateAlarmStatus();
+  loadSurah();
+  updateClock();
+  setInterval(updateClock,1000);
+
+  /* Restore a test alarm after a page reload if it has not expired. */
+  if(state.testAlarm){
+    if(state.testAlarm.fireAt>Date.now()){
+      const delay=state.testAlarm.fireAt-Date.now();
+      testAlarmTimer=setTimeout(()=>{
+        notifyUser("Noor reminder",state.testAlarm?.label||"Personal reminder");
+        testSound();
+        state.testAlarm=null;
+        saveState();
+        updateAlarmStatus();
+      },Math.min(delay,2147480000));
+    }else{
+      state.testAlarm=null;
+      saveState();
+      updateAlarmStatus();
+    }
+  }
+}
+init();
+</script>
+
+
+</body>
+</html>
